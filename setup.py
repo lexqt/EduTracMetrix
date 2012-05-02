@@ -1,37 +1,64 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
-# name can be any name.  This name will be used to create .egg file.
-# name that is used in packages is the one that is used in the trac.ini file.
-# use package name as entry_points
+PACKAGE = 'tracmetrix'
+
+extra = {} 
+try:
+    from trac.util.dist import get_l10n_cmdclass
+    cmdclass = get_l10n_cmdclass()
+    if cmdclass:
+        extra['cmdclass'] = cmdclass
+        extractors = [
+            ('**.py',                'python', None),
+            ('**/templates/**.html', 'genshi', None),
+            ('**/templates/**.txt',  'genshi', {
+                'template_class': 'genshi.template:NewTextTemplate',
+            }),
+        ]
+        extra['message_extractors'] = {
+            PACKAGE: extractors,
+        }
+except ImportError:
+    pass
+
 setup(
     description='Plugin to provide Trac project metrics and statistics',
     keywords='trac plugin metrics statistics',
-    version='0.1.8',
+    version='0.2',
     url='',
     license='http://www.opensource.org/licenses/bsd-license.php',
-    author='Bhuricha Sethanandha at Portland State University',
-    author_email='khundeen@gmail.com',
-    maintainer = 'Ryan J Ollos',
-    maintainer_email = 'ryano@physiosonics.com',
+    author='Bhuricha Sethanandha, Aleksey A. Porfirov',
+    author_email='lexqt@yandex.ru',
     long_description="""
-    This Trac 0.11 plugin provides support for project metrics and statistics.
+    This Trac 0.12 (EduTrac) plugin provides support for project metrics and statistics.
 
-    See http://trac-hacks.org/wiki/TracMetrixPlugin for details.
+    Original plugin: http://trac-hacks.org/wiki/TracMetrixPlugin
     """,
-    name='TracMetrixPlugin',
-    packages=find_packages(exclude=['*.tests*']),
-    entry_points = """
-        [trac.plugins]
-        tracmetrixplugin.mdashboard = tracmetrixplugin.mdashboard
-        tracmetrixplugin.web_ui = tracmetrixplugin.web_ui
-        tracmetrixplugin.api = tracmetrixplugin.api
-        tracmetrixplugin.model = tracmetrixplugin.model
-    """,
-    package_data={'tracmetrixplugin': ['templates/*.html', 
-                                       'htdocs/css/*.css', 
-                                       'htdocs/images/*']},
-    install_requires = ['Python >= 2.4', 
-                        'Trac >= 0.11.6',
-                        'MatPlotLib >= 0.87.7',
-                        'NumPy >= 1.0.1'],
+    name = 'EduTracMetrix',
+    packages = [PACKAGE],
+    entry_points = {
+        'trac.plugins': [
+            'tracmetrix.mdashboard = tracmetrix.mdashboard',
+            'tracmetrix.web_ui = tracmetrix.web_ui',
+            'tracmetrix.model = tracmetrix.model'
+        ]
+    },
+    package_data={PACKAGE: ['templates/*.html', 
+                            'htdocs/css/*.css', 
+                            'locale/*/LC_MESSAGES/*.mo']},
+    **extra
 )
+
+#### AUTHORS ####
+## Author of original TracMetrixPlugin:
+## Bhuricha Sethanandha at Portland State University
+## khundeen@gmail.com
+##
+## Maintainer of original TracMetrixPlugin:
+## Ryan J Ollos
+## ryano@physiosonics.com
+##
+## Author of EduTrac adaptation, a lot of fixes and enhancements:
+## Aleksey A. Porfirov
+## lexqt@yandex.ru
+## github: lexqt

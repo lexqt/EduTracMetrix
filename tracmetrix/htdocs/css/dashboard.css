@@ -61,6 +61,9 @@ li.pdashboard { list-style: none; margin-bottom: 4em }
 .pdashboard .info dd { display: inline; margin: 0 1em 0 .5em }
 .pdashboard .description { margin-left: 1em }
 
+.pdashboard table.project { white-space: normal; }
+.pdashboard table.project th { vertical-align: middle; }
+
 /* Styles for the mdashbard view */
 ul.milestones { margin: 2em 0 0; padding: 0 }
 li.milestone { list-style: none; margin-bottom: 4em }
@@ -83,7 +86,7 @@ li.milestone { list-style: none; margin-bottom: 4em }
  color: #888;
  font-size: 11px;
  font-style: italic;
- margin: 0;
+ margin: 0 0 1em;
 }
 .milestone .info .progress { margin: 1em 1em 0; width: 40em; max-width: 70% }
 .milestone .info dl {

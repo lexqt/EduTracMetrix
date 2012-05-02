@@ -1,0 +1,326 @@
+# Russian translations for EduTracMetrix.
+# Copyright (C) 2012 ORGANIZATION
+# This file is distributed under the same license as the EduTracMetrix
+# project.
+#
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+# Aleksey A. Porfirov <lexqt@yandex.ru>, 2012.
+msgid ""
+msgstr ""
+"Project-Id-Version: EduTracMetrix 0.2\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2012-05-02 17:20+0400\n"
+"PO-Revision-Date: 2012-05-02 17:21+0400\n"
+"Last-Translator: Aleksey A. Porfirov <lexqt@yandex.ru>\n"
+"Language-Team: Russian <>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 0.9.6\n"
+"Language: ru\n"
+"X-Generator: Lokalize 1.2\n"
+
+#: tracmetrix/mdashboard.py:269
+msgid "To project metrics"
+msgstr "К метрикам проекта"
+
+#: tracmetrix/mdashboard.py:269
+msgid "Dashboard"
+msgstr "Информационная панель"
+
+#: tracmetrix/model.py:63
+msgid "ticket status"
+msgstr "статус тикетов"
+
+#: tracmetrix/model.py:63 tracmetrix/model.py:79 tracmetrix/model.py:130
+#: tracmetrix/model.py:176
+#, fuzzy
+msgid "tickets"
+msgstr ""
+
+#: tracmetrix/model.py:64
+msgid "Closed"
+msgstr "Закрытые"
+
+#: tracmetrix/model.py:67
+msgid "In progress"
+msgstr "В работе"
+
+#: tracmetrix/model.py:70 tracmetrix/templates/pdashboard.html:82
+msgid "New"
+msgstr "Новые"
+
+#: tracmetrix/model.py:79
+msgid "ticket resolution"
+msgstr "решение по карточкам"
+
+#: tracmetrix/model.py:130 tracmetrix/model.py:176
+msgid "ticket type"
+msgstr "тип карточек"
+
+#: tracmetrix/model.py:224
+msgid "Number of comments per ticket"
+msgstr "Число комментариев на карточку"
+
+#: tracmetrix/model.py:225
+msgid "Number of milestone changed per ticket"
+msgstr "Число изменений этапа на карточку"
+
+#: tracmetrix/model.py:226
+msgid "Number of closed per ticket"
+msgstr "Число закрытий на карточку"
+
+#: tracmetrix/model.py:230
+msgid "Lead time"
+msgstr "Время выполнения"
+
+#: tracmetrix/model.py:231
+msgid "Closed time"
+msgstr "Время в закрытом состоянии"
+
+#: tracmetrix/web_ui.py:154 tracmetrix/templates/pdashboard.html:237
+msgid "Metrics"
+msgstr "Метрики"
+
+#: tracmetrix/templates/mdashboard.html:11
+#, python-format
+msgid "Milestone metrics: %(name)s"
+msgstr "Метрики этапа разработки: %(name)s"
+
+#: tracmetrix/templates/mdashboard.html:34
+#, python-format
+msgid "Milestone metrics: [1:%(name)s]"
+msgstr "Метрики этапа разработки: [1:%(name)s]"
+
+#: tracmetrix/templates/mdashboard.html:39
+#: tracmetrix/templates/pdashboard.html:96
+#, fuzzy, python-format
+msgid "Completed %(duration)s ago (%(date)s)"
+msgstr ""
+
+#: tracmetrix/templates/mdashboard.html:44
+#: tracmetrix/templates/pdashboard.html:101
+#, fuzzy, python-format
+msgid "[1:%(duration)s late] (%(date)s)"
+msgstr ""
+
+#: tracmetrix/templates/mdashboard.html:49
+#: tracmetrix/templates/pdashboard.html:106
+#, fuzzy, python-format
+msgid "Due in %(duration)s (%(date)s)"
+msgstr ""
+
+#: tracmetrix/templates/mdashboard.html:53
+#: tracmetrix/templates/pdashboard.html:110
+#, fuzzy
+msgid "No date set"
+msgstr ""
+
+#: tracmetrix/templates/mdashboard.html:58
+msgid "Ticket Status Summary"
+msgstr "Статистика по состоянию карточек"
+
+#: tracmetrix/templates/mdashboard.html:63
+msgid "Ticket Type Summary"
+msgstr "Статистика по типу карточек"
+
+#: tracmetrix/templates/mdashboard.html:74
+msgid "Ticket History"
+msgstr "История карточек"
+
+#: tracmetrix/templates/mdashboard.html:75
+msgid ""
+"[1:Entered tickets] — tickets created in this milestone or tickets "
+"retargeted\n"
+"          to this milestone from others.[2:]\n"
+"          [3:Left tickets] — tickets moved from this milestone to "
+"others.[4:]\n"
+"          [5:Completed tickets] — tickets completed in this milestone (do"
+" not include\n"
+"          already completed tickets retargeted from other milestones).[6:]"
+msgstr ""
+"[1:Добавленные карточки] — карточки, созданные в этом этапе или "
+"переназначенные на этот этап из других.[2:]\n"
+"          [3:Переведенные карточки] — карточки, переведенные из этого "
+"этапа в другой.[4:]\n"
+"          [5:Закрытые карточки] — карточки, завершенные в этом этапе (не "
+"включаются уже закрытые карточки, переназначенные из других этапов).[6:]"
+
+#: tracmetrix/templates/mdashboard.html:96
+msgid "Ticket Entered"
+msgstr "Добавленные карточки"
+
+#: tracmetrix/templates/mdashboard.html:102
+msgid "Ticket Left"
+msgstr "Переведенные карточки"
+
+#: tracmetrix/templates/mdashboard.html:108
+msgid "Ticket Completed"
+msgstr "Закрытые карточки"
+
+#: tracmetrix/templates/mdashboard.html:131
+msgid "Ticket History Table"
+msgstr "Таблица истории карточек"
+
+#: tracmetrix/templates/mdashboard.html:136
+#: tracmetrix/templates/pdashboard.html:212
+msgid "Date"
+msgstr "Дата"
+
+#: tracmetrix/templates/mdashboard.html:137
+msgid "Enter"
+msgstr "Добавлено"
+
+#: tracmetrix/templates/mdashboard.html:138
+msgid "Leave"
+msgstr "Переведено"
+
+#: tracmetrix/templates/mdashboard.html:139
+#: tracmetrix/templates/pdashboard.html:84
+msgid "Completed"
+msgstr "Завершено"
+
+#: tracmetrix/templates/pdashboard.html:11
+#: tracmetrix/templates/pdashboard.html:28
+msgid "Project Metrics"
+msgstr "Метрики проекта"
+
+#: tracmetrix/templates/pdashboard.html:34
+msgid "Show completed milestones"
+msgstr "Показывать завершенные этапы"
+
+#: tracmetrix/templates/pdashboard.html:39
+msgid "Show all metrics"
+msgstr "Показывать все метрики"
+
+#: tracmetrix/templates/pdashboard.html:40
+msgid "(Warning: The all metrics can take long time to generate.)"
+msgstr "(Прим.: Генерация данных по всем метрикам может занять время)"
+
+#: tracmetrix/templates/pdashboard.html:45
+msgid ""
+"[1:View statistics from [2:]] [3:]\n"
+"          and [4:[5:] days back]"
+msgstr ""
+"[1:Просмотр статистики с [2:]] [3:]\n"
+"          и на [4:[5:] дней назад]"
+
+#: tracmetrix/templates/pdashboard.html:50
+#, fuzzy
+msgid "Update"
+msgstr ""
+
+#: tracmetrix/templates/pdashboard.html:55
+msgid "Project Tickets Summary"
+msgstr "Статистика по карточкам проекта"
+
+#: tracmetrix/templates/pdashboard.html:57
+msgid "Tickets by Status"
+msgstr "Карточки по состоянию"
+
+#: tracmetrix/templates/pdashboard.html:65
+msgid "Closed Tickets by Resolution"
+msgstr "Закрытые карточки по решению"
+
+#: tracmetrix/templates/pdashboard.html:76
+msgid "Milestone Summary"
+msgstr "Статистика по этапам разработки"
+
+#: tracmetrix/templates/pdashboard.html:80
+#, fuzzy
+msgid "Milestone"
+msgstr ""
+
+#: tracmetrix/templates/pdashboard.html:81
+msgid "Status"
+msgstr "Состояние"
+
+#: tracmetrix/templates/pdashboard.html:83
+msgid "In-progress"
+msgstr "В работе"
+
+#: tracmetrix/templates/pdashboard.html:85
+msgid "Total"
+msgstr "Всего"
+
+#: tracmetrix/templates/pdashboard.html:86
+msgid "Completion"
+msgstr "Завершенность"
+
+#: tracmetrix/templates/pdashboard.html:127
+msgid "Repository Statistics"
+msgstr "Статистика репозитория"
+
+#: tracmetrix/templates/pdashboard.html:138
+msgid "Commits"
+msgstr "Наборы изменений"
+
+#: tracmetrix/templates/pdashboard.html:163
+msgid "Project Backlog Metrics"
+msgstr "Метрики выполнения работ по проекту"
+
+#: tracmetrix/templates/pdashboard.html:164
+msgid "Daily Backlog Statistics"
+msgstr "Ежедневная статистика по невыполненным работам"
+
+#: tracmetrix/templates/pdashboard.html:176
+msgid "Opened Tickets Count"
+msgstr "Число открытых карточек"
+
+#: tracmetrix/templates/pdashboard.html:182
+msgid "Close Tickets Events"
+msgstr "Закрыто карточек"
+
+#: tracmetrix/templates/pdashboard.html:188
+msgid "New/Open Tickets Events"
+msgstr "Создано/открыто карточек"
+
+#: tracmetrix/templates/pdashboard.html:208
+msgid "Weekly Backlog Statistics"
+msgstr "Ежедневная статистика по невыполненным работам"
+
+#: tracmetrix/templates/pdashboard.html:213
+msgid "Ticket Created"
+msgstr "Число созданных карточек"
+
+#: tracmetrix/templates/pdashboard.html:214
+msgid "Ticket Opened"
+msgstr "Число открытых карточек"
+
+#: tracmetrix/templates/pdashboard.html:215
+msgid "Ticket Closed"
+msgstr "Число закрытых карточек"
+
+#: tracmetrix/templates/pdashboard.html:216
+msgid "[1:BMI] Index[2:](Closed/Opened)"
+msgstr "Индекс [1:BMI][2:](отношение закрытых к открытым)"
+
+#: tracmetrix/templates/pdashboard.html:233
+msgid "Tickets Statistics"
+msgstr "Статистика по задачам"
+
+#: tracmetrix/templates/pdashboard.html:238
+msgid "Mean"
+msgstr "Среднее"
+
+#: tracmetrix/templates/pdashboard.html:239
+msgid "Median"
+msgstr "Медиана"
+
+#: tracmetrix/templates/pdashboard.html:240
+msgid "Max"
+msgstr "Макс."
+
+#: tracmetrix/templates/pdashboard.html:241
+msgid "Min"
+msgstr "Мин."
+
+#: tracmetrix/templates/pdashboard.html:242
+msgid "Std. Dev."
+msgstr "Стд. откл."
+
+#~ msgid "Weekly Backlog Metrics"
+#~ msgstr "Еженедельные метрики по невыполненным работам"
+
