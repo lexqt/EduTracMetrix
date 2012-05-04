@@ -77,16 +77,16 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
 
     q = '''
         SELECT ticket.id AS tid, ticket.type, ticket.time, ticket.status,
-            ticket_change.time, ticket.milestone, ticket_change.field,
+            ticket_change.time AS change_time, ticket.milestone, ticket_change.field,
             ticket_change.oldvalue, ticket_change.newvalue
         FROM ticket LEFT JOIN ticket_change ON ticket.id = ticket_change.ticket
             AND (ticket_change.field='status' OR ticket_change.field='milestone')
         WHERE ticket.id IN %s
         UNION
         SELECT ticket.id AS tid, ticket.type, ticket.time, ticket.status,
-            ticket.time, ticket.milestone, null, null, null FROM ticket
+            ticket.time AS change_time, ticket.milestone, null, null, null FROM ticket
         WHERE ticket.time = ticket.changetime AND ticket.id IN %s
-        ORDER BY tid
+        ORDER BY tid, change_time DESC
     '''
     ids = tuple(ticket_ids)
     cursor.execute(q, (ids, ids))
