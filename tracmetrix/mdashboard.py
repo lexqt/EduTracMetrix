@@ -16,8 +16,6 @@
 # Copyright (C) 2012 Aleksey A. Porfirov
 
 import re
-
-from datetime import timedelta
 from itertools import groupby
 
 from trac.config import BoolOption, ExtensionOption, IntOption, Option
@@ -49,31 +47,36 @@ def get_every_tickets_in_milestone(db, project_id, milestone):
         UNION
         SELECT id FROM ticket WHERE milestone=%s AND project_id=%s
         ''', (milestone, project_id, milestone, project_id))
+
     tickets = []
     for tkt_id, in cursor:
         tickets.append(tkt_id)
 
     return tickets
 
-def add_milestone_event(history, time, event, ticket_id):
-
-    time = to_datetime(time).date()
-    if history.has_key(time):
-
-        history[time][event].add(ticket_id)
-    else:
-
-        history[time]={'Enter':set(), 'Leave':set(), 'Finish':set()}
-        #make the list of ticket as set so that there is no duplicate
-        #this is to handle the case where many ticket fields are changed
-        #at the same time.
-        history[time][event].add(ticket_id)
 
 def collect_tickets_status_history(db, ticket_ids, milestone):
 
     history = {}
 
-    cursor = db.cursor()
+    def add_milestone_event(history, time, event, ticket_id):
+#        time = to_datetime(time).date()
+        if history.has_key(time):
+            history[time][event].add(ticket_id)
+        else:
+            history[time]={'Enter':set(), 'Leave':set(), 'Finish':set()}
+            #make the list of ticket as set so that there is no duplicate
+            #this is to handle the case where many ticket fields are changed
+            #at the same time.
+            history[time][event].add(ticket_id)
+
+    def add_ticket_status_event(history, time, old_status, status, tkt_id):
+        # ticket was closed
+        if status == 'closed':
+            add_milestone_event(history, time, 'Finish', tkt_id)
+        # ticket was reopened
+        elif old_status == 'closed':
+            add_milestone_event(history, time, 'Enter', tkt_id)
 
     q = '''
         SELECT ticket.id AS tid, ticket.type, ticket.time, ticket.status,
@@ -86,9 +89,10 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
         SELECT ticket.id AS tid, ticket.type, ticket.time, ticket.status,
             ticket.time AS change_time, ticket.milestone, null, null, null FROM ticket
         WHERE ticket.time = ticket.changetime AND ticket.id IN %s
-        ORDER BY tid, change_time DESC
+        ORDER BY tid, change_time ASC
     '''
     ids = tuple(ticket_ids)
+    cursor = db.cursor()
     cursor.execute(q, (ids, ids))
 
     event_history = cursor.fetchall()
@@ -114,7 +118,7 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
         # The event will be store in the list until we find out what milestone do the
         # event belong to.
         current_milestone = None
-        current_status = 'Active'
+        current_status    = None
         for tkt_id, tkt_type, tkt_createdtime, tkt_status, tkt_changedtime, \
             tkt_milestone, tkt_field, tkt_oldvalue, tkt_newvalue in events:
 
@@ -142,12 +146,12 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
                         current_milestone = tkt_newvalue
 
                         # Ticket was create with milestone
-                        if milestone_changed == False:
+                        if not milestone_changed:
                             # update the enter event
                             add_milestone_event(history, tkt_createdtime, 'Enter', tkt_id)
                             # it means that the eariler status event has to be in the milestone.
-                            for tkt_changedtime, tkt_oldvalue, tkt_newvalue, tkt_id in status_events:
-                                add_ticket_status_event(history, tkt_changedtime, tkt_oldvalue, tkt_newvalue, tkt_id)
+                            for stkt_changedtime, stkt_oldvalue, stkt_newvalue, stkt_id in status_events:
+                                add_ticket_status_event(history, stkt_changedtime, stkt_oldvalue, stkt_newvalue, stkt_id)
 
                         add_milestone_event(history, tkt_changedtime, 'Leave', tkt_id)
 
@@ -167,7 +171,7 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
 
             # new ticket that was created and assigned to the milestone
             else:
-                add_milestone_event(history, ticket[1], 'Enter', ticket[0])
+                add_milestone_event(history, tkt_createdtime, 'Enter', tkt_id)
 
         # if milestone never changed it means that the ticket was assing to the milestone.
         if not milestone_changed:
@@ -179,16 +183,33 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
 
     return history
 
-def add_ticket_status_event(history, time, old_status, status, tkt_id):
-
-    # ticket was closed
-    if status == 'closed':
-        add_milestone_event(history, time, 'Finish', tkt_id)
-
-    # ticket was reopened
-    elif old_status == 'closed':
-        add_milestone_event(history, time, 'Enter', tkt_id)
-
+def prepare_to_cumulate(sorted_events):
+    dhist = {}
+    for date, date_events in groupby(sorted_events, lambda (t, events): to_datetime(t).date()):
+        evset = {'Enter': set(), 'Leave': set(), 'Finish': set()}
+        dhist[date] = evset
+        date_events_list = list(date_events)
+        for (t, events) in date_events_list:
+            for k, ids in events.iteritems():
+                evset[k] |= ids
+        # resolve Enter / Leave conflicts
+        enter_leave_ids = evset['Enter'] & evset['Leave']
+        if enter_leave_ids:
+            evs = {'Enter': None, 'Leave': None}
+            last = {'Enter': None, 'Leave': None}
+            for k in ('Enter', 'Leave'):
+                evs[k] = sorted([(t, evs['Enter']) for (t, evs) in date_events_list],
+                                key=lambda (t, ids): t)
+            for id in enter_leave_ids:
+                for k in ('Enter', 'Leave'):
+                    last[k] = 0
+                    for t, ids in reversed(evs[k]):
+                        if id in ids:
+                            last[k] = t
+                            break
+                to_del = (last['Enter'] > last['Leave']) and 'Leave' or 'Enter'
+                evset[to_del].remove(id)
+    return dhist
 
 def make_cumulative_data(dates, history):
     tkt_counts = {'Enter':[], 'Leave':[], 'Finish':[]}
@@ -323,22 +344,23 @@ class MDashboard(Component):
 
                 # Sort the key in the history list
                 # returns sorted list of tuple of (key, value)
-                sorted_events = sorted(tkt_history.items(), key=lambda(k,v):(k))
+                sorted_events = sorted(tkt_history.items(), key=lambda(t,events):(t))
 
                 # Get first date that ticket enter the milestone
-                min_time = min(sorted_events)[0]
-                begin_date = to_datetime(min_time)
+                min_time = sorted_events[0][0]
+                begin_date = to_datetime(min_time, tzinfo=req.tz)
 
                 if milestone.is_completed:
                     end_date = milestone.completed
                 else:
                     end_date = None
-                end_date = to_datetime(end_date)
+                end_date = to_datetime(end_date, tzinfo=req.tz)
 
                 dates = list(date_generator(begin_date, end_date))
 
                 #Create a data for the cumulative flow chart.
-                tkt_cumulative_table = make_cumulative_data(dates, tkt_history)
+                date_history = prepare_to_cumulate(sorted_events)
+                tkt_cumulative_table = make_cumulative_data(dates, date_history)
 
                 #prepare Yahoo datasource for comulative flow chart
                 dscumulative = ''
