@@ -5,35 +5,37 @@
       xmlns:py="http://genshi.edgewall.org/"
       xmlns:xi="http://www.w3.org/2001/XInclude"
       xmlns:i18n="http://genshi.edgewall.org/i18n"
-      i18n:domain="tracmetrix">
+      i18n:domain="tracmetrix"
+      py:with="milestone_selected=defined('milestone')">
   <xi:include href="layout.html" />
-  <head>
-    <title i18n:msg="name">Milestone metrics: ${milestone.name}</title>
-    <!-- Dependencies -->
-    <script type="text/javascript" src="${yui_base_url}/build/yahoo-dom-event/yahoo-dom-event.js"></script>
-    <script type="text/javascript" src="${yui_base_url}/build/element/element-min.js"></script>
-    <script type="text/javascript" src="${yui_base_url}/build/datasource/datasource-min.js"></script>
-    <script type="text/javascript" src="${yui_base_url}/build/json/json-min.js"></script>
-    <!-- OPTIONAL: Connection (enables XHR) -->
-    <script type="text/javascript" src="${yui_base_url}/build/connection/connection-min.js"></script>
-    <!-- Source files -->
-    <script type="text/javascript" src="${yui_base_url}/build/charts/charts-min.js"></script>
-    <script type="text/javascript">
-        YAHOO.widget.Chart.SWFURL = "${yui_base_url}/build/charts/assets/charts.swf";
-    </script>
-    <script type="text/javascript">
-        $(document).ready(function() {
-            $("#content").find("h1,h2,h3,h4,h5,h6").addAnchor("Link to this section");
-        });
-    </script>
-  </head>
 
-  <body>
-    <div id="ctxtnav" class="nav"></div>
-    <div id="content" class="milestone">
+  <py:choose test="milestone_selected">
+    <head py:when="True">
+      <title i18n:msg="name">Milestone metrics: ${milestone.name}</title>
+      <!-- Dependencies -->
+      <script type="text/javascript" src="${yui_base_url}/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+      <script type="text/javascript" src="${yui_base_url}/build/element/element-min.js"></script>
+      <script type="text/javascript" src="${yui_base_url}/build/datasource/datasource-min.js"></script>
+      <script type="text/javascript" src="${yui_base_url}/build/json/json-min.js"></script>
+      <!-- OPTIONAL: Connection (enables XHR) -->
+      <script type="text/javascript" src="${yui_base_url}/build/connection/connection-min.js"></script>
+      <!-- Source files -->
+      <script type="text/javascript" src="${yui_base_url}/build/charts/charts-min.js"></script>
+      <script type="text/javascript">
+          YAHOO.widget.Chart.SWFURL = "${yui_base_url}/build/charts/assets/charts.swf";
+      </script>
+    </head>
+    <head py:otherwise="">
+      <title>Milestone metrics</title>
+    </head>
+  </py:choose>
+
+  <body py:choose="milestone_selected">
+
+    <div py:when="True" id="content" class="milestone">
       <h1 i18n:msg="name">Milestone metrics: <a href="${href.milestone(milestone.name)}">${milestone.name}</a></h1>
 
-      <div class="info">
+      <div class="report-wrapper">
         <py:choose>
           <p py:when="milestone.completed" class="date">
             <i18n:msg params="duration, date">
@@ -53,33 +55,56 @@
           <p py:otherwise="" class="date">
             No date set
           </p>
+          <br />
         </py:choose>
 
         <h2>Ticket Status Summary</h2>
-        <py:if test="stats.count">
+        <br />
+        <div py:if="stats.count" class="info">
           <xi:include href="progress_bar.html"/>
-        </py:if>
+        </div>
 
         <h2>Ticket Type Summary</h2>
-        <py:if test="ticketstat.stats.count">
+        <br />
+        <div py:if="ticketstat.stats.count" class="info">
           <xi:include href="progress_bar.html"
               py:with="stats = ticketstat.stats;
               interval_hrefs = ticketstat.interval_hrefs;
               stats_href = ticketstat.stats_href;"/>
-        </py:if>
+        </div>
 
       </div>
 
-      <div class="info">
+      <div class="report-wrapper">
         <h2>Ticket History</h2>
         <p i18n:msg="">
           <strong>Entered tickets</strong> — tickets created in this milestone or tickets retargeted
           to this milestone from others.<br/>
           <strong>Left tickets</strong> — tickets moved from this milestone to others.<br/>
-          <strong>Completed tickets</strong> — tickets completed in this milestone (do not include
-          already completed tickets retargeted from other milestones).<br/>
+          <strong>Completed tickets</strong> — tickets completed in this milestone (or previously
+          in other milestones).<br/>
         </p>
-        <div id="cumulative_flow" style="width: 640px; height: 480px;"></div>
+        <div id="cumulative_flow" class="graph" style="width: 640px; height: 480px;"></div>
+        <div class="data-table">
+          <table cellpadding="0" cellspacing="1">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Enter</th>
+                <th>Leave</th>
+                <th >Completed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr py:for="idx, date in enumerate(dates)" class="date">
+                <td>${format_date(date,tzinfo=utc)}</td>
+                <td>${tickethistory['Enter'][idx]}</td>
+                <td>${tickethistory['Leave'][idx]}</td>
+                <td>${tickethistory['Finish'][idx]}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <script type = "text/javascript">
@@ -127,29 +152,16 @@
         });
       </script>
 
-      <div class="table">
-        <h2>Ticket History Table</h2>
-
-        <table style="width: 300px" class="listing ticket history">
-          <thead>
-            <tr>
-              <th style="width: 90px">Date</th>
-              <th style="width: 50px">Enter</th>
-              <th style="width: 55px">Leave</th>
-              <th style="width: 90px">Completed</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr py:for="idx, date in enumerate(dates)" class="date">
-              <td style="width: 90px">${format_date(date,tzinfo=utc)}</td>
-              <td style="width: 50px">${tickethistory['Enter'][idx]}</td>
-              <td style="width: 55px">${tickethistory['Leave'][idx]}</td>
-              <td style="width: 90px">${tickethistory['Finish'][idx]}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
     </div>
+
+    <div py:otherwise="" id="content">
+      <p>Please, select milestone to view statistics for:</p>
+      <ul>
+        <li py:for="m in milestones">
+          <a href="${href.mdashboard(m.name)}">${m.name}</a>
+        </li>
+      </ul>
+    </div>
+
   </body>
 </html>

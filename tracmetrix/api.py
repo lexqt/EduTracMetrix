@@ -1,13 +1,13 @@
 from datetime import date, timedelta
 
 from trac.core import Component
-from trac.config import Option
+from trac.config import Option, IntOption
 
 from trac.util.translation import domain_functions
 
 
 
-__all__ = ['TeamCalendarSetupParticipant']
+__all__ = ['TracMetrix']
 
 _, tag_, N_, add_domain = \
     domain_functions('tracmetrix', ('_', 'tag_', 'N_', 'add_domain'))
@@ -18,6 +18,10 @@ class TracMetrix(Component):
     yui_base_url = Option('tracmetrix', 'yui_base_url',
                           default='http://yui.yahooapis.com/2.7.0',
                           doc='Location of YUI API')
+    authors_limit_repos = IntOption('tracmetrix', 'authors_limit_repos', 10,
+                                    'Limit count for most active repos authors')
+    authors_limit_wiki = IntOption('tracmetrix', 'authors_limit_wiki', 10,
+                                    'Limit count for most active wiki authors')
 
     def __init__(self):
         import pkg_resources

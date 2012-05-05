@@ -8,7 +8,7 @@
       i18n:domain="tracmetrix">
   <xi:include href="layout.html" />
   <head>
-    <title>Project Metrics</title>
+    <title>Project metrics</title>
     <!-- Dependencies -->
     <script type="text/javascript" src="${yui_base_url}/build/yahoo-dom-event/yahoo-dom-event.js"></script>
     <script type="text/javascript" src="${yui_base_url}/build/element/element-min.js"></script>
@@ -19,113 +19,208 @@
     <!-- Source files -->
     <script type="text/javascript" src="${yui_base_url}/build/charts/charts-min.js"></script>
     <script type="text/javascript">
-        YAHOO.widget.Chart.SWFURL = "${yui_base_url}/build/charts/assets/charts.swf";
+      YAHOO.widget.Chart.SWFURL = "${yui_base_url}/build/charts/assets/charts.swf";
+      jQuery(document).ready(function($){
+        $("div.report-wrapper h2").enableFolding(false);
+      });
     </script>
   </head>
 
   <body>
     <div id="content" class="pdashboard">
-      <h1>Project Metrics</h1>
+      <h1>Project metrics</h1>
 
+      <!-- Preferences -->
       <form id="prefs" method="get" action="">
-        <div>
-          <input type="checkbox" id="showall" name="show" value="all"
-          checked="${showall or None}" />
-          <label for="showall">Show completed milestones</label>
-        </div>
-        <div>
-          <input type="checkbox" id="showmetrics" name="showmetrics" value="true"
-          checked="${showmetrics or None}" />
-          <label for="showmetrics">
-            Show all metrics<br />
-            (Warning: The all metrics can take long time to generate.)
+        <fieldset>
+          <legend>Summary metrics</legend>
+          <label>
+            <input type="checkbox" id="tkt_summary" name="tkt_summary" value="1" checked="${metrics.tkt_summary or None}" />
+            Project tickets summary
           </label>
-        </div>
-        <br />
-        <div i18n:msg="">
-          <label>View statistics from <input type="text" size="10" name="from" value="${format_date(fromdate)}" /></label> <br />
-          and <label><input type="text" size="3" name="daysback" value="$daysback" /> days back</label>
-        </div>
+          <label>
+            <input type="checkbox" id="milestones_stats" name="milestones_stats" value="1" checked="${metrics.milestones_stats or None}" />
+            Milestones statistics
+          </label>
+          <label class="subpref">
+            <input type="checkbox" id="show_completed" name="show_completed" value="1" checked="${show_completed or None}" />
+            Show completed milestones
+          </label>
+          <label>
+            <input type="checkbox" id="tkt_extra_stats" name="tkt_extra_stats" value="1" checked="${metrics.tkt_extra_stats or None}" />
+            Tickets extra statistics
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Time range metrics</legend>
+          <label>
+            <input type="checkbox" id="tkt_activity" name="tkt_activity" value="1" checked="${metrics.tkt_activity or None}" />
+            Ticket activity
+          </label>
+          <label>
+            <input type="checkbox" id="repos_stats" name="repos_stats" value="1" checked="${metrics.repos_stats or None}" />
+            Repository statistics
+          </label>
+          <label>
+            <input type="checkbox" id="backlog_daily" name="backlog_daily" value="1" checked="${metrics.backlog_daily or None}" />
+            Daily backlog statistics
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Time range metrics with grouping</legend>
+          <label>
+            <input type="checkbox" id="repos_activity" name="repos_activity" value="1" checked="${metrics.repos_activity or None}" />
+            Repository activity
+          </label>
+          <label>
+            <input type="checkbox" id="backlog_table" name="backlog_table" value="1" checked="${metrics.backlog_table or None}" />
+            Backlog statistics table
+          </label>
+          <label>
+            <input type="checkbox" id="wiki_activity" name="wiki_activity" value="1" checked="${metrics.wiki_activity or None}" />
+            Wiki activity
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Time range options</legend>
+          <div i18n:msg="">
+            <label>View statistics from <input type="text" size="10" name="from" value="${format_date(fromdate)}" /></label> <br />
+            and <label><input type="text" size="3" name="daysback" value="$daysback" /> days back</label>
+          </div>
+          <div i18n:msg="">
+            <label>Use groups <input type="text" size="3" name="groupsize" value="$groupsize" /> days long</label>
+          </div>
+        </fieldset>
         <div class="buttons">
           <input type="submit" value="${_('Update')}" />
         </div>
       </form>
 
-      <div class="info">
-        <h2>Project Tickets Summary</h2>
-        <br/>
-        <b>Tickets by Status</b>
-        <py:if test="proj_progress_stat.stats.count">
-          <xi:include href="progress_bar.html"
-              py:with="stats = proj_progress_stat.stats;
-              interval_hrefs = proj_progress_stat.interval_hrefs;
-              stats_href = proj_progress_stat.stats_href;"/>
-        </py:if>
-        <br/>
-        <b>Closed Tickets by Resolution</b>
-        <py:if test="proj_progress_stat.stats.count">
-          <xi:include href="progress_bar.html"
-              py:with="stats = proj_closed_stat.stats;
-              interval_hrefs = proj_closed_stat.interval_hrefs;
-              stats_href = proj_closed_stat.stats_href;"/>
-        </py:if>
+      <!-- Project tickets summary -->
+      <div py:if="metrics.tkt_summary" class="report-wrapper">
+        <h2 class="foldable">Project tickets summary</h2>
+        <div>
+          <p>Statistics includes all project tickets for all time.</p>
+          <h3>Tickets by Status</h3>
+          <div py:if="proj_progress_stat.stats.count" class="milestone">
+            <div class="info">
+              <xi:include href="progress_bar.html"
+                  py:with="stats = proj_progress_stat.stats;
+                  interval_hrefs = proj_progress_stat.interval_hrefs;
+                  stats_href = proj_progress_stat.stats_href;"/>
+            </div>
+          </div>
+          <h3>Closed Tickets by Resolution</h3>
+          <div py:if="proj_closed_stat.stats.count" class="milestone">
+            <div class="info">
+              <xi:include href="progress_bar.html"
+                  py:with="stats = proj_closed_stat.stats;
+                  interval_hrefs = proj_closed_stat.interval_hrefs;
+                  stats_href = proj_closed_stat.stats_href;"/>
+            </div>
+          </div>
+        </div>
       </div>
-      <br/>
 
-      <div class="info">
-        <h2>Milestone Summary</h2>
-        <table class="listing milestone">
-          <thead>
-            <tr>
-              <th class="style1">Milestone</th>
-              <th>Status</th>
-              <th>New</th>
-              <th>In-progress</th>
-              <th>Completed</th>
-              <th>Total</th>
-              <th>Completion</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr py:for="idx, milestone in enumerate(milestones)" class="milestone"
-            py:with="mstats = milestone_stats[idx]">
-              <td><a href="${href.mdashboard(milestone.name)}">${milestone.name}</a></td>
-              <td>
-                <py:choose>
-                  <p py:when="milestone.completed" class="date">
-                    <i18n:msg params="duration, date">
-                      Completed ${dateinfo(milestone.completed)} ago (${format_datetime(milestone.completed)})
-                    </i18n:msg>
-                  </p>
-                  <p py:when="milestone.is_late" class="date">
-                    <i18n:msg params="duration, date">
-                      <strong>${dateinfo(milestone.due)} late</strong> (${format_datetime(milestone.due)})
-                    </i18n:msg>
-                  </p>
-                  <p py:when="milestone.due" class="date">
-                    <i18n:msg params="duration, date">
-                      Due in ${dateinfo(milestone.due)} (${format_datetime(milestone.due)})
-                    </i18n:msg>
-                  </p>
-                  <p py:otherwise="" class="date">
-                    No date set
-                  </p>
-                </py:choose>
-              </td>
-              <td><a href="${mstats.interval_hrefs[2]}">${mstats.stats.intervals[2].count}</a></td>
-              <td><a href="${mstats.interval_hrefs[1]}">${mstats.stats.intervals[1].count}</a></td>
-              <td><a href="${mstats.interval_hrefs[0]}">${mstats.stats.intervals[0].count}</a></td>
-              <td><a href="${mstats.stats_href}">${sum([x.count for x in mstats.stats.intervals], 0)}</a></td>
-              <td>${'%d%%' % mstats.stats.done_percent}</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Milestone summary -->
+      <div py:if="metrics.milestones_stats" class="report-wrapper">
+        <h2 class="foldable">Milestone summary</h2>
+        <div>
+          <table class="listing auto-width">
+            <thead>
+              <tr>
+                <th>Milestone</th>
+                <th>Status</th>
+                <th>New</th>
+                <th>In-progress</th>
+                <th>Completed</th>
+                <th>Total</th>
+                <th>Completion</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr py:for="idx, milestone in enumerate(milestones)"
+              py:with="mstats = milestone_stats[idx]">
+                <td><a href="${href.mdashboard(milestone.name)}">${milestone.name}</a></td>
+                <td>
+                  <py:choose>
+                    <span py:when="milestone.completed" class="date">
+                      <i18n:msg params="duration, date">
+                        Completed ${dateinfo(milestone.completed)} ago (${format_datetime(milestone.completed)})
+                      </i18n:msg>
+                    </span>
+                    <span py:when="milestone.is_late" class="date">
+                      <i18n:msg params="duration, date">
+                        <strong>${dateinfo(milestone.due)} late</strong> (${format_datetime(milestone.due)})
+                      </i18n:msg>
+                    </span>
+                    <span py:when="milestone.due" class="date">
+                      <i18n:msg params="duration, date">
+                        Due in ${dateinfo(milestone.due)} (${format_datetime(milestone.due)})
+                      </i18n:msg>
+                    </span>
+                    <span py:otherwise="" class="date">
+                      No date set
+                    </span>
+                  </py:choose>
+                </td>
+                <td><a href="${mstats.interval_hrefs[2]}">${mstats.stats.intervals[2].count}</a></td>
+                <td><a href="${mstats.interval_hrefs[1]}">${mstats.stats.intervals[1].count}</a></td>
+                <td><a href="${mstats.interval_hrefs[0]}">${mstats.stats.intervals[0].count}</a></td>
+                <td><a href="${mstats.stats_href}">${sum([x.count for x in mstats.stats.intervals], 0)}</a></td>
+                <td>${'%d%%' % mstats.stats.done_percent}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <br/>
 
-      <div class="info">
-        <h2>Repository Statistics</h2>
-        <div id="commits_per_day" style="width: 640px; height: 480px;"></div>
+      <!-- Ticket activity -->
+      <div py:if="metrics.tkt_activity" class="report-wrapper">
+        <h2 class="foldable">Ticket activity</h2>
+        <div>
+          <p>Statistics includes tickets created or changed within a specified time range.</p>
+          <div class="graph">
+            <!-- Ticket activity chart -->
+            ${ticket_activity.chart_info.embed()}
+            <!-- Ticket activity data. -->
+          </div>
+          <div class="data-table">
+            <table cellpadding="0" cellspacing="1">
+              <thead>
+                <tr>
+                  <th colspan="0">${ticket_activity.title}</th>
+                </tr>
+                <tr>
+                  <th py:for="label in ticket_activity.columns">${label}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr py:for="row in ticket_activity.results">
+                  <td>${row[0]}</td>
+                  <td>${row[1]}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <script language="javascript" type="text/javascript">
+          var ticket_activity = ${json.ticket_activity};
+          jQuery(function(){
+                  setTimeout(function () {
+                          loadActivityPieChart(ticket_activity.chart_info);
+                  }, 200);
+          });
+        </script>
+      </div>
+
+      <!-- Repository statistics -->
+      <div py:if="metrics.repos_stats" class="report-wrapper">
+        <h2 class="foldable">Repository statistics</h2>
+        <div>
+          <div id="commits_per_day" style="width: 640px; height: 480px;"></div>
+        </div>
         <script type = "text/javascript">
             //--- data
             var commitperday = $ds_commit_by_date
@@ -156,57 +251,106 @@
             });
         </script>
       </div>
-      <br/>
-      <br/>
-      <py:if test="showmetrics">
-        <div class="info">
-          <h2>Project Backlog Metrics</h2>
-          <h3>Daily Backlog Statistics</h3>
+
+      <!-- Repository activity -->
+      <div py:if="metrics.repos_activity" class="report-wrapper">
+        <h2 class="foldable">Repository activity</h2>
+        <div>
+          <div class="graph">
+            <!-- Repository activity chart -->
+            ${repository_activity.chart_info.embed()}
+            <!-- Repository activity data. -->
+          </div>
+          <div class="data-table">
+            <table cellpadding="0" cellspacing="1">
+              <thead>
+                <tr>
+                  <th colspan="${len(repository_activity.columns)+1}">${repository_activity.title}</th>
+                </tr>
+                <tr>
+                  <th rowspan="2">Periods</th>
+  
+                  <th colspan="${len(repository_activity.columns)}">Authors</th>
+                </tr>
+                <tr>
+                  <th py:for="author in repository_activity.columns">${author}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr py:for="row in repository_activity.results">
+                  <td>${row[0]}</td>
+                  <td py:for="data_serie in row[1]">${data_serie}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <script language="javascript" type="text/javascript">
+          var repository_activity = ${json.repository_activity};
+          jQuery(function(){
+                  setTimeout(function () {
+                          loadActivityChart(repository_activity.chart_info);
+                  }, 200);
+          });
+        </script>
+      </div>
+
+      <!-- Daily backlog statistics -->
+      <div py:if="metrics.backlog_daily" class="report-wrapper">
+        <h2 class="foldable">Daily backlog statistics</h2>
+        <div>
           <div id="daily_backlog" style="width: 640px; height: 480px;"></div>
-          <script type = "text/javascript">
-            //--- data
-            var tickethistory = $ds_daily_backlog
-            var ds = new YAHOO.util.DataSource(tickethistory);
-            ds.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
-            ds.responseSchema = {
-                fields : ["date", "opened", "closed", "created"]
-            };
-            var seriesDef = [{
-                type : "line",
-                displayName : "${_('Opened Tickets Count')}",
-                yField : "opened",
-                style : {
-                    color : 0x0000FF
-                }
-            }, {
-                displayName : "${_('Close Tickets Events')}",
-                yField : "closed",
-                style : {
-                    color : 0xbae0ba
-                }
-            }, {
-                displayName : "${_('New/Open Tickets Events')}",
-                yField : "created",
-                style : {
-                    color : 0x9966ff
-                }
-            }];
-            //--- chart
-            var mychart = new YAHOO.widget.StackedColumnChart("daily_backlog", ds, {
-                xField : "date",
-                series : seriesDef,
-                style : {
-                    legend : {
-                        display : "bottom"
-                    },
-                    xAxis : {
-                        labelRotation : -60
-                    }
-                }
-            });
-          </script>
-          <h3>Weekly Backlog Statistics</h3>
-          <table class="listing project stats">
+        </div>
+        <script type = "text/javascript">
+          //--- data
+          var tickethistory = $ds_daily_backlog
+          var ds = new YAHOO.util.DataSource(tickethistory);
+          ds.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
+          ds.responseSchema = {
+              fields : ["date", "opened", "closed", "created"]
+          };
+          var seriesDef = [{
+              type : "line",
+              displayName : "${_('Opened Tickets Count')}",
+              yField : "opened",
+              style : {
+                  color : 0x0000FF
+              }
+          }, {
+              displayName : "${_('Close Tickets Events')}",
+              yField : "closed",
+              style : {
+                  color : 0xbae0ba
+              }
+          }, {
+              displayName : "${_('New/Open Tickets Events')}",
+              yField : "created",
+              style : {
+                  color : 0x9966ff
+              }
+          }];
+          //--- chart
+          var mychart = new YAHOO.widget.StackedColumnChart("daily_backlog", ds, {
+              xField : "date",
+              series : seriesDef,
+              style : {
+                  legend : {
+                      display : "bottom"
+                  },
+                  xAxis : {
+                      labelRotation : -60
+                  }
+              }
+          });
+        </script>
+      </div>
+
+      <!-- Backlog statistics table -->
+      <div py:if="metrics.backlog_table" class="report-wrapper">
+        <h2 class="foldable">Backlog statistics table</h2>
+        <div>
+          <table class="listing project">
             <thead>
               <tr>
                 <th>Date</th>
@@ -227,14 +371,61 @@
             </tbody>
           </table>
         </div>
-        <br/>
+      </div>
+      <br/>
 
-        <div class="info">
-          <h2>Tickets Statistics</h2>
-          <table class="listing milestone">
+      <!-- Wiki activity -->
+      <div py:if="metrics.wiki_activity" class="report-wrapper">
+        <h2 class="foldable">Wiki activity</h2>
+        <div>
+          <div class="graph">
+            <!-- Wiki activity chart -->
+            ${wiki_activity.chart_info.embed()}
+            <!-- Wiki activity data. -->
+          </div>
+          <div class="data-table">
+            <table cellpadding="0" cellspacing="1">
+              <thead>
+                <tr>
+                  <th colspan="${len(wiki_activity.columns)+1}">${wiki_activity.title}</th>
+                </tr>
+                <tr>
+                  <th rowspan="2">Periods</th>
+  
+                  <th colspan="${len(wiki_activity.columns)}">Authors</th>
+                </tr>
+                <tr>
+                  <th py:for="author in wiki_activity.columns">${author}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr py:for="row in wiki_activity.results">
+                  <td>${row[0]}</td>
+                  <td py:for="data_serie in row[1]">${data_serie}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <script language="javascript" type="text/javascript">
+          var wiki_activity = ${json.wiki_activity};
+          jQuery(function(){
+                  setTimeout(function () {
+                          loadActivityChart(wiki_activity.chart_info);
+                  }, 200);
+          });
+        </script>
+      </div>
+
+      <!-- Tickets extra statistics -->
+      <div py:if="metrics.tkt_extra_stats" class="report-wrapper">
+        <h2 class="foldable">Tickets extra statistics</h2>
+        <div>
+          <table class="listing auto-width">
             <thead>
               <tr>
-                <th class="style1">Metrics</th>
+                <th>Metrics</th>
                 <th>Mean</th>
                 <th>Median</th>
                 <th>Max</th>
@@ -260,8 +451,7 @@
             </tbody>
           </table>
         </div>
-
-      </py:if>
+      </div>
 
     </div>
 

@@ -18,21 +18,28 @@
 import re
 from itertools import groupby
 
-from trac.config import BoolOption, ExtensionOption, IntOption, Option
 from trac.core import Component, implements
+from trac.config import ExtensionOption
+from trac.resource import ResourceNotFound
+
 from trac.ticket import Milestone, TicketSystem
 from trac.ticket.roadmap import ITicketGroupStatsProvider, get_ticket_stats, get_tickets_for_milestone, milestone_stats_data
 from trac.util.compat import sorted
 from trac.util.datefmt import to_datetime, format_date, utc
 from trac.web import IRequestHandler
+
 from trac.web.chrome import add_stylesheet, INavigationContributor, add_ctxtnav
+from genshi.builder import tag
 
 from tracmetrix.api import TracMetrix, date_generator, _
 
 
+__all__ = ['MDashboard']
+
 
 def get_every_tickets_in_milestone(db, project_id, milestone):
-    """ Get list of ticket id that have ever been in this milestone.
+    """
+    Get the list of ticket id that have ever been in this milestone.
     This includes the ticket that was assigned to the milestone and
     later reassigned to a different milestone.
     """
@@ -265,10 +272,12 @@ class MDashboard(Component):
     # INavigationContributor methods
 
     def get_active_navigation_item(self, req):
-        return 'pdashboard'
+        return 'mdashboard'
 
     def get_navigation_items(self, req):
-        return []
+        if 'ROADMAP_VIEW' in req.perm:
+            yield ('mainnav', 'mdashboard',
+                   tag.a(_('Milestone metrics'), href=req.href.mdashboard()))
 
     # IRequestHandler methods
 
@@ -279,17 +288,34 @@ class MDashboard(Component):
         req.perm.require('MILESTONE_VIEW')
         pid = req.project
 
+        valid_milestone = True
+
         m = re.match(r'/mdashboard/(.*)', req.path_info)
         if not m:
-            req.redirect(req.href.pdashboard())
-        milestone_id = m.group(1)
+            valid_milestone = False
+        else:
+            milestone_id = m.group(1)
+            try:
+                milestone = Milestone(self.env, pid, milestone_id)
+            except ResourceNotFound:
+                valid_milestone = False
 
-        milestone = Milestone(self.env, pid, milestone_id)
-
+        add_ctxtnav(req, _('To project statistics'), req.href.pdashboard(), _('Project statistics'))
         add_stylesheet(req, 'tracmetrix/css/dashboard.css')
-        add_ctxtnav(req, _('To project metrics'), req.href.pdashboard(), _('Dashboard'))
+        add_stylesheet(req, 'common/css/roadmap.css')
 
-        return self._render_view(req, milestone)
+        if valid_milestone:
+            return self._render_view(req, milestone)
+        else:
+            return self._render_milestone_list(req)
+
+    def _render_milestone_list(self, req):
+        project_id = req.data['project_id']
+        milestones = Milestone.select(self.env, project_id, include_completed=True)
+        data = {
+            'milestones': milestones,
+        }
+        return 'mdashboard.html', data, None
 
     def _render_view(self, req, milestone):
         available_groups = []

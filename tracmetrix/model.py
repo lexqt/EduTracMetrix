@@ -60,7 +60,7 @@ class ProgressTicketGroupStatsProvider(Component):
 
         inprogress_cnt = total_cnt - ( active_cnt + closed_cnt)
 
-        stat = TicketGroupStats(_('ticket status'), _('tickets'))
+        stat = TicketGroupStats(_('ticket status'), '')
         stat.add_interval(_('Closed'), closed_cnt,
                           {'status': 'closed', 'group': 'resolution'},
                           'closed', True)
@@ -76,7 +76,7 @@ class ProgressTicketGroupStatsProvider(Component):
 
     def get_ticket_resolution_group_stats(self, ticket_ids, pid):
 
-        stat = TicketGroupStats(_('ticket resolution'), _('tickets'))
+        stat = TicketGroupStats(_('ticket resolution'), '')
 
         if len(ticket_ids):
             db = self.env.get_db_cnx()
@@ -127,7 +127,7 @@ class ProgressTicketGroupStatsProvider(Component):
         else:
             type_count = []
 
-        stat = TicketGroupStats(_('ticket type'), _('tickets'))
+        stat = TicketGroupStats(_('ticket type'), '')
 
 
         for type in type_count:
@@ -173,7 +173,7 @@ class TicketTypeGroupStatsProvider(Component):
         else:
             type_count = []
 
-        stat = TicketGroupStats(_('ticket type'), _('tickets'))
+        stat = TicketGroupStats(_('ticket type'), '')
 
 
         for type in type_count:

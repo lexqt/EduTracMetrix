@@ -1,0 +1,208 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:i18n="http://genshi.edgewall.org/i18n"
+      i18n:domain="tracmetrix">
+  <xi:include href="layout.html" />
+  <head>
+    <title i18n:msg="user">User metrics: ${user_fullname(user)}</title>
+    <!-- Dependencies -->
+    <script type="text/javascript" src="${yui_base_url}/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+    <script type="text/javascript" src="${yui_base_url}/build/element/element-min.js"></script>
+    <script type="text/javascript" src="${yui_base_url}/build/datasource/datasource-min.js"></script>
+    <script type="text/javascript" src="${yui_base_url}/build/json/json-min.js"></script>
+    <!-- OPTIONAL: Connection (enables XHR) -->
+    <script type="text/javascript" src="${yui_base_url}/build/connection/connection-min.js"></script>
+    <!-- Source files -->
+    <script type="text/javascript" src="${yui_base_url}/build/charts/charts-min.js"></script>
+    <script type="text/javascript">
+      YAHOO.widget.Chart.SWFURL = "${yui_base_url}/build/charts/assets/charts.swf";
+      jQuery(document).ready(function($){
+        $("div.report-wrapper h2").enableFolding(false);
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="content" class="pdashboard">
+      <h1 i18n:msg="user">User metrics: ${user_fullname(user)}</h1>
+
+      <!-- Preferences -->
+      <form id="prefs" method="get" action="">
+        <div>
+          <label><strong>User:</strong>
+            <select name="user" id="user">
+              <py:for each="auser in users">
+                <option value="${auser}" selected="${auser == user or None}">${user_fullname(auser)}</option>
+              </py:for>
+            </select>
+          </label>
+        </div>
+        <fieldset>
+          <legend>Time range metrics with grouping</legend>
+          <label>
+            <input type="checkbox" id="tkt_activity" name="tkt_activity" value="1" checked="${metrics.tkt_activity or None}" />
+            Ticket activity
+          </label>
+          <label>
+            <input type="checkbox" id="repos_activity" name="repos_activity" value="1" checked="${metrics.repos_activity or None}" />
+            Repository activity
+          </label>
+          <label>
+            <input type="checkbox" id="wiki_activity" name="wiki_activity" value="1" checked="${metrics.wiki_activity or None}" />
+            Wiki activity
+          </label>
+        </fieldset>
+        <fieldset>
+          <legend>Time range options</legend>
+          <div i18n:msg="">
+            <label>View statistics from <input type="text" size="10" name="from" value="${format_date(fromdate)}" /></label> <br />
+            and <label><input type="text" size="3" name="daysback" value="$daysback" /> days back</label>
+          </div>
+          <div i18n:msg="">
+            <label>Use groups <input type="text" size="3" name="groupsize" value="$groupsize" /> days long</label>
+          </div>
+        </fieldset>
+        <div class="buttons">
+          <input type="submit" value="${_('Update')}" />
+        </div>
+      </form>
+
+
+      <!-- Ticket activity -->
+      <div py:if="metrics.tkt_activity" class="report-wrapper">
+        <h2 class="foldable">Ticket activity</h2>
+        <div>
+          <div class="graph">
+            <!-- Ticket activity chart -->
+            ${tkt_activity.chart_info.embed()}
+          </div>
+          <div class="data-table">
+            <!-- Ticket activity data -->
+            <table cellpadding="0" cellspacing="1">
+              <thead>
+                <tr>
+                  <th colspan="${len(tkt_activity.columns)+1}">${tkt_activity.title}</th>
+                </tr>
+                <tr>
+                  <th rowspan="2">Periods</th>
+                  <th colspan="${len(tkt_activity.columns)}">Events</th>
+                </tr>
+                <tr>
+                  <th py:for="status in tkt_activity.columns">${status}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr py:for="row in tkt_activity.results">
+                  <td>${row[0]}</td>
+                  <td py:for="data in row[1]">${data}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <script language="javascript" type="text/javascript">
+          var tkt_activity = ${json.tkt_activity};
+          jQuery(function(){
+                  setTimeout(function () {
+                          loadActivityChart(tkt_activity.chart_info);
+                  }, 200);
+          });
+        </script>
+      </div>
+
+      <!-- Repository activity -->
+      <div py:if="metrics.repos_activity" class="report-wrapper">
+        <h2 class="foldable">Repository activity</h2>
+        <div>
+          <div class="graph">
+            <!-- Repository activity chart -->
+            ${repos_activity.chart_info.embed()}
+          </div>
+          <div class="data-table">
+            <!-- Repository activity data -->
+            <table cellpadding="0" cellspacing="1">
+              <thead>
+                <tr>
+                  <th colspan="${len(repos_activity.columns)+1}">${repos_activity.title}</th>
+                </tr>
+                <tr>
+                  <th rowspan="2">Periods</th>
+                  <th colspan="${len(repos_activity.columns)}">Events</th>
+                </tr>
+                <tr>
+                  <th py:for="col in repos_activity.columns">${col}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr py:for="row in repos_activity.results">
+                  <td>${row[0]}</td>
+                  <td py:for="data in row[1]">${data}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <script language="javascript" type="text/javascript">
+          var repos_activity = ${json.repos_activity};
+          jQuery(function(){
+                  setTimeout(function () {
+                          loadActivityChart(repos_activity.chart_info);
+                  }, 200);
+          });
+        </script>
+      </div>
+
+      <!-- Wiki activity -->
+      <div py:if="metrics.wiki_activity" class="report-wrapper">
+        <h2 class="foldable">Wiki activity</h2>
+        <div>
+          <div class="graph">
+            <!-- Wiki activity chart -->
+            ${wiki_activity.chart_info.embed()}
+          </div>
+          <div class="data-table">
+            <!-- Wiki activity data -->
+            <table cellpadding="0" cellspacing="1">
+              <thead>
+                <tr>
+                  <th colspan="${len(wiki_activity.columns)+1}">${wiki_activity.title}</th>
+                </tr>
+                <tr>
+                  <th rowspan="2">Periods</th>
+                  <th colspan="${len(wiki_activity.columns)}">Events</th>
+                </tr>
+                <tr>
+                  <th py:for="col in wiki_activity.columns">${col}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr py:for="row in wiki_activity.results">
+                  <td>${row[0]}</td>
+                  <td py:for="data in row[1]">${data}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="clear"></div>
+        </div>
+        <script language="javascript" type="text/javascript">
+          var wiki_activity = ${json.wiki_activity};
+          jQuery(function(){
+                  setTimeout(function () {
+                          loadActivityChart(wiki_activity.chart_info);
+                  }, 200);
+          });
+        </script>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>
