@@ -89,7 +89,7 @@ def collect_tickets_status_history(db, ticket_ids, milestone):
         SELECT ticket.id AS tid, ticket.type, ticket.time, ticket.status,
             ticket_change.time AS change_time, ticket.milestone, ticket_change.field,
             ticket_change.oldvalue, ticket_change.newvalue
-        FROM ticket LEFT JOIN ticket_change ON ticket.id = ticket_change.ticket
+        FROM ticket JOIN ticket_change ON ticket.id = ticket_change.ticket
             AND (ticket_change.field='status' OR ticket_change.field='milestone')
         WHERE ticket.id IN %s
         UNION

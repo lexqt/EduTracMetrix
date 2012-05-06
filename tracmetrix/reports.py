@@ -243,7 +243,7 @@ def ticket_activity_user(project_id, username, start_date, end_date, groupsize, 
               t.time >= %s AND t.time < %s
         UNION
         SELECT t.id, tc.time, 'closed' AS event
-        FROM ticket t LEFT JOIN ticket_change tc ON t.id = tc.ticket
+        FROM ticket t JOIN ticket_change tc ON t.id = tc.ticket
             AND tc.field='status' AND tc.newvalue='closed'
         WHERE t.owner=%s AND t.project_id=%s AND
               tc.time >= %s AND tc.time < %s
