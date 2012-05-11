@@ -243,7 +243,7 @@ class TicketGroupMetrics(object):
 
     def get_tickets_created_during(self, start_date, end_date):
 
-        end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
 
         tkt_ids = []
 
@@ -255,7 +255,7 @@ class TicketGroupMetrics(object):
 
     def get_remaning_opened_ticket_on(self, end_date):
 
-        end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
 
         tkt_ids = []
 
@@ -293,7 +293,7 @@ class TicketGroupMetrics(object):
 
     def get_tickets_closed_during(self, start_date, end_date):
 
-        end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
 
         tkt_ids = []
 
@@ -334,7 +334,7 @@ class TicketGroupMetrics(object):
         """
 
         dates = list(date_generator(start_date, end_date))
-        end_date = end_date.replace(hour=23, minute=59, second=59)
+        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
 
 
         # each key is the list of list of ticket.  The index of the list is corresponding
@@ -360,20 +360,26 @@ class TicketGroupMetrics(object):
                     # determine index
                     date = ticket.time_created.date()
                     #get index of day in the dates list
-                    index = dates.index(date)
+                    try:
+                        index = dates.index(date)
 
-                    # add ticket created ticket list
-                    backlog_stats['created'][index].append(ticket.id)
+                        # add ticket created ticket list
+                        backlog_stats['created'][index].append(ticket.id)
+                    except ValueError:
+                        pass
 
                 for t, author, field, oldvalue, newvalue, permanent in ticket.get_changelog():
 
                     if field == 'status' and start_date <= t <= end_date and \
                             'closed' in (newvalue, oldvalue):
-                        index = dates.index(t.date())
-                        if newvalue == 'closed':
-                            backlog_stats['closed'][index].append(ticket.id)
-                        else:
-                            backlog_stats['opened'][index].append(ticket.id)
+                        try:
+                            index = dates.index(t.date())
+                            if newvalue == 'closed':
+                                backlog_stats['closed'][index].append(ticket.id)
+                            else:
+                                backlog_stats['opened'][index].append(ticket.id)
+                        except ValueError:
+                            pass
 
         # update opened ticket list
         for idx, list_ in enumerate(backlog_stats['opened']):
@@ -602,8 +608,11 @@ class ChangesetsStats(object):
 
         for rev, time, author in self.changesets:
             date_ = to_datetime(time, utc).date()
-            index = dates.index(date_)
-            numcommits[index] += 1
+            try:
+                index = dates.index(date_)
+                numcommits[index] += 1
+            except ValueError:
+                pass
 
         return (dates, numcommits)
 
