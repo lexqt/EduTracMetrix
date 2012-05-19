@@ -57,7 +57,10 @@ def aggregate_events_by_periods(events, events_data, start_date, groupsize, grou
         groups_data[e] = [initial_aggr(e) for i in xrange(groupcnt)]
     for ed in events_data:
         event = ed[0]
-        idx = groups_map[ed[1].date()]
+        try:
+            idx = groups_map[ed[1].date()]
+        except KeyError:
+            continue
         func(groups_data[event], idx, ed)
 
     return (groups_labels, groups_data)
